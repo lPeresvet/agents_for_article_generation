@@ -1,0 +1,60 @@
+services:
+  chromadb:
+    image: chromadb/chroma:latest
+    container_name: agents-chromadb
+    environment:
+      IS_PERSISTENT: "TRUE"
+      ANONYMIZED_TELEMETRY: "FALSE"
+    volumes:
+      - chroma_data:/chroma/chroma
+    ports:
+      - "8000:8000"
+
+  article-agents:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: article-agents:latest
+    depends_on:
+      - chromadb
+    environment:
+      GIGACHAT_CREDENTIALS: ${GIGACHAT_CREDENTIALS:-}
+      GIGACHAT_SCOPE: ${GIGACHAT_SCOPE:-GIGACHAT_API_PERS}
+      GIGACHAT_MODEL: ${GIGACHAT_MODEL:-GigaChat}
+      GIGACHAT_TEMPERATURE: ${GIGACHAT_TEMPERATURE:-}
+      GIGACHAT_VERIFY_SSL_CERTS: ${GIGACHAT_VERIFY_SSL_CERTS:-}
+      MODEL_ROUTE_OVERRIDE: ${MODEL_ROUTE_OVERRIDE:-}
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen3.5:2b}
+      OLLAMA_EMBED_MODEL: ${OLLAMA_EMBED_MODEL:-nomic-embed-text}
+      OLLAMA_TEMPERATURE: ${OLLAMA_TEMPERATURE:-0.3}
+      OLLAMA_REQUEST_TIMEOUT: ${OLLAMA_REQUEST_TIMEOUT:-600}
+      OLLAMA_NUM_PREDICT: ${OLLAMA_NUM_PREDICT:-}
+      CHROMA_HOST: ${CHROMA_HOST:-chromadb}
+      CHROMA_PORT: ${CHROMA_PORT:-8000}
+      CHROMA_COLLECTION: ${CHROMA_COLLECTION:-article_agents_manager}
+      CHROMA_CONNECT_RETRIES: ${CHROMA_CONNECT_RETRIES:-20}
+      CHROMA_CONNECT_DELAY: ${CHROMA_CONNECT_DELAY:-2}
+      MANAGER_MEMORY_ENABLED: ${MANAGER_MEMORY_ENABLED:-1}
+      MANAGER_MEMORY_K: ${MANAGER_MEMORY_K:-3}
+      MANAGER_MEMORY_MIN_SIMILARITY: ${MANAGER_MEMORY_MIN_SIMILARITY:-0.9}
+      MANAGER_MEMORY_CANDIDATES_K: ${MANAGER_MEMORY_CANDIDATES_K:-2}
+      MEMORY_CACHE_RETURN: ${MEMORY_CACHE_RETURN:-1}
+      MEMORY_SCAN_MAX: ${MEMORY_SCAN_MAX:-5000}
+      MEMORY_CACHE_SEMANTIC_FIRST: ${MEMORY_CACHE_SEMANTIC_FIRST:-0}
+      TOPIC: ${TOPIC:-Photosynthesis in one short explainer}
+      LANGCHAIN_TRACING_V2: ${LANGCHAIN_TRACING_V2:-}
+      LANGCHAIN_API_KEY: ${LANGCHAIN_API_KEY:-}
+      LANGCHAIN_PROJECT: ${LANGCHAIN_PROJECT:-}
+      LANGCHAIN_ENDPOINT: ${LANGCHAIN_ENDPOINT:-}
+      LANGCHAIN_TAGS: ${LANGCHAIN_TAGS:-}
+      LANGSMITH_TOPIC_PREVIEW_CHARS: ${LANGSMITH_TOPIC_PREVIEW_CHARS:-200}
+      LANGSMITH_RUN_NAME_PREFIX: ${LANGSMITH_RUN_NAME_PREFIX:-}
+    command: ["-i", "-v"]
+    stdin_open: true
+    tty: true
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+volumes:
+  chroma_data:

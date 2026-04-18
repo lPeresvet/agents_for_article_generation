@@ -1,0 +1,10 @@
+langgraph>=0.2.0,<0.3
+langchain-core>=0.3.0,<0.4
+langsmith>=0.1.125,<0.4
+langchain-ollama>=0.2.0,<0.3
+langchain-gigachat>=0.3.12,<0.4
+duckduckgo-search>=6.0,<8
+chromadb>=0.5,<2
+python-dotenv>=1.0,<2
+grandalf>=0.8,<0.9
+graphviz>=0.20,<0.22
